@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workflow-app name="scheduled_workflow_SqoopJob" xmlns="uri:oozie:workflow:0.2">
+
+<start to="sqoopBranchTable"/>    
+<action name="sqoopBranchTable">   
+  
+<sqoop xmlns="uri:oozie:sqoop-action:0.2">
+  		<job-tracker>${jobTracker}</job-tracker>
+   		<name-node>${nameNode}</name-node>
+<prepare>
+               <delete path="${nameNode}/user/maria_dev/CREDIT_CARD_SYSTEM/SQOOP_JOB_INCREMENTAL/CDW_SAPP_D_BRANCH"/>    
+            </prepare>
+
+<configuration>
+    <property>
+      <name>mapred.job.queue.name</name>
+       <value>${queueName}</value>
+     </property>
+</configuration>
+
+<command>job --meta-connect jdbc:hsqldb:hsql://localhost:16000/sqoop --exec BranchSqoopIncrement</command>  
+<archive>/user/maria_dev/lib/java-json.jar#java-json.jar</archive>
+
+</sqoop>
+
+
+<ok to= "sqoopCreditCardTable"/>
+    
+<error to= "kill"/>
+
+</action>
+
+
+<action name="sqoopCreditCardTable">   
+  
+<sqoop xmlns="uri:oozie:sqoop-action:0.2">
+  		<job-tracker>${jobTracker}</job-tracker>
+   		<name-node>${nameNode}</name-node>
+<prepare>
+<delete path="${nameNode}/user/maria_dev/CREDIT_CARD_SYSTEM/SQOOP_JOB_INCREMENTAL/CDW_SAPP_F_CREDITCARD"/>    
+</prepare>
+
+<configuration>
+    <property>
+      <name>mapred.job.queue.name</name>
+       <value>${queueName}</value>
+     </property>
+</configuration>
+
+<command>job --meta-connect jdbc:hsqldb:hsql://localhost:16000/sqoop --exec CreditCardSqoopIncrement</command>  
+<archive>/user/maria_dev/lib/java-json.jar#java-json.jar</archive>
+
+</sqoop>
+
+
+<ok to= "sqoopCustomerTable"/>
+    
+<error to= "kill"/>
+
+</action>
+
+<action name="sqoopCustomerTable">   
+  
+<sqoop xmlns="uri:oozie:sqoop-action:0.2">
+  		<job-tracker>${jobTracker}</job-tracker>
+   		<name-node>${nameNode}</name-node>
+	<prepare>
+            <delete path="${nameNode}/user/maria_dev/CREDIT_CARD_SYSTEM/SQOOP_JOB_INCREMENTAL/CDW_SAPP_D_CUSTOMER"/>    
+	</prepare>
+
+<configuration>
+    <property>
+      <name>mapred.job.queue.name</name>
+       <value>${queueName}</value>
+     </property>
+</configuration>
+
+<command>job --meta-connect jdbc:hsqldb:hsql://localhost:16000/sqoop --exec CustomerSqoopIncrement</command>  
+<archive>/user/maria_dev/lib/java-json.jar#java-json.jar</archive>
+
+</sqoop>
+
+
+<ok to = "sqoopTimeIDTable"/>
+    
+<error to = "kill"/>
+
+</action>
+
+<action name="sqoopTimeIDTable">   
+  
+<sqoop xmlns="uri:oozie:sqoop-action:0.2">
+  		<job-tracker>${jobTracker}</job-tracker>
+   		<name-node>${nameNode}</name-node>
+<prepare>
+               <delete path="${nameNode}/user/maria_dev/CREDIT_CARD_SYSTEM/SQOOP_JOB_INCREMENTAL/CDW_SAPP_D_TIME"/>    
+            </prepare>
+
+<configuration>
+    <property>
+      <name>mapred.job.queue.name</name>
+       <value>${queueName}</value>
+     </property>
+</configuration>
+
+<command>job  --meta-connect jdbc:hsqldb:hsql://localhost:16000/sqoop --exec TimeIDSqoopIncrement</command>  
+<archive>/user/maria_dev/lib/java-json.jar#java-json.jar</archive>
+
+</sqoop>
+
+<ok to = "Hive_Incre_Oozie_Tables" />
+
+<error to ="kill"/>
+
+</action>
+
+<action name = "Hive_Incre_Oozie_Tables">
+    
+<hive xmlns ="uri:oozie:hive-action:0.4">
+       
+<job-tracker>${jobTracker}</job-tracker>
+       
+<name-node>${nameNode}</name-node>
+
+<configuration>
+                <property>
+                    <name>mapred.job.queue.name</name>
+                    <value>${queueName}</value>
+                </property>
+            </configuration>
+
+      
+<script>${nameNode}/user/maria_dev/CREDIT_CARD_SYSTEM_OOZIE/Coordinator/AllTheScript.sql</script>
+
+
+</hive>
+
+
+<ok to = "Insert_Into_BranchIncrePartiOozie"/>
+    
+<error to = "kill"/>
+
+</action>
+
+ <action name = "Insert_Into_BranchIncrePartiOozie">
+      <hive xmlns = "uri:oozie:hive-action:0.4">
+         <job-tracker>${jobTracker}</job-tracker>
+         <name-node>${nameNode}</name-node>
+
+     <script>${nameNode}/user/maria_dev/CREDIT_CARD_SYSTEM_OOZIE/Coordinator/All_Table_Partition_Oozie.hql</script>
+        
+
+</hive>
+
+<ok to = "end" />
+    
+<error to = "kill" />
+
+  
+</action>
+
+ 
+<kill name = "kill">
+    
+<message> Job_failed </message>
+ 
+</kill>
+
+ <end name = "end" />
+
+</workflow-app>
+
+
+
+
+

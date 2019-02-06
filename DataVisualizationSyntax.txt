@@ -1,0 +1,15 @@
+select b.branch_zip as zipcode, sum(cr.transaction_value) as total_value
+from branch_oozie b
+join credit_card_oozie cr
+on b.branch_code = cr.branch_code
+group by b.branch_zip
+order by total_value desc
+limit 20;
+
+
+Select sum(cr.transaction_value), cr.transaction_type
+From cdw_sapp_f_credit_card_partition cr
+Join cdw_sapp_f_timeid_partition t
+on t.transaction_id = cr.transaction_id
+Where year = "2018"
+Group by Quarter;

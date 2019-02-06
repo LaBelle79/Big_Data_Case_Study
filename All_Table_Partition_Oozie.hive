@@ -1,0 +1,95 @@
+drop table CDW_SAPP_D_BRANCH;
+
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstrict;
+
+create table CDW_SAPP_D_BRANCH (
+
+BRANCH_CODE		INT,
+BRANCH_NAME		VARCHAR(25),
+BRANCH_STREET		VARCHAR(30),
+BRANCH_CITY		VARCHAR(30),
+BRANCH_STATE		VARCHAR(30),
+BRANCH_PHONE		VARCHAR(13),
+LAST_UPDATED		TIMESTAMP
+)
+
+PARTITIONED BY (BRANCH_ZIP STRING)
+ROW FORMAT DELIMITED
+Fields Terminated by '\t'
+STORED AS textfile
+
+LOCATION "/user/maria_dev/Credit_Card_System/PARTITION_TABLES/BRANCH_PARTITION";
+
+drop table CDW_SAPP_D_CUSTOMER;
+
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstrict;
+
+create table CDW_SAPP_D_CUSTOMER (
+
+CUST_SSN		INT,
+CUST_F_NAME		VARCHAR(40),
+CUST_M_NAME		VARCHAR(40),
+CUST_L_NAME		VARCHAR(40),
+CUST_CC_NO		STRING,
+CUST_STREET		VARCHAR(38),
+CUST_CITY		VARCHAR(30),
+CUST_COUNTRY		VARCHAR(30),
+CUST_ZIP		STRING,
+CUST_PHONE		VARCHAR(8),
+CUST_EMAIL		VARCHAR(40),
+LAST_UPDATED		TIMESTAMP
+)
+
+PARTITIONED BY (CUST_STATE VARCHAR(30))
+ROW FORMAT DELIMITED
+Fields Terminated by '\t'
+STORED AS textfile
+LOCATION "/user/maria_dev/Credit_Card_System/PARTITION_TABLES/CUSTOMER_PARTITION";
+
+
+drop table CDW_SAPP_F_CREDIT_CARD;
+
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstrict;
+
+create table CDW_SAPP_F_CREDIT_CARD (
+
+CUST_CC_NO		STRING,
+TIMEID			VARCHAR(8),
+CUST_SSN		INT,
+BRANCH_CODE		INT,
+TRANSACTION_VALUE	DECIMAL(20,3),
+TRANSACTION_ID		INT
+)
+
+PARTITIONED BY (TRANSACTION_TYPE VARCHAR(30))
+ROW FORMAT DELIMITED
+Fields Terminated by '\t'
+STORED AS textfile
+LOCATION "/user/maria_dev/Credit_Card_System/PARTITION_TABLES/CREDIT_CARD_PARTITION";
+
+
+drop table CDW_SAPP_D_TIME;
+
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstrict;
+
+CREATE TABLE CDW_SAPP_D_TIME (
+
+TRANSACTION_ID	INT,
+TIMEID		VARCHAR(8),
+DAY		INT,
+MONTH		INT,
+YEAR		INT
+
+)
+
+PARTITIONED BY (QUARTER	VARCHAR(8))
+ROW FORMAT DELIMITED
+Fields Terminated by '\t'
+STORED AS textfile
+
+LOCATION "/user/maria_dev/Credit_Card_System/PARTITION_TABLES/TIMEID_PARTITION";
+
